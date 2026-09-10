@@ -4,3 +4,17 @@ The AD8232 is built with an instrumentation amplifier, a few amplifiers, come co
 
 Build such a chip from scratch should not be too complex. An instrumentation amplifier's pupose is to amplify the mV range differential signals and reject the large background noise. 
 After the IA, the signal can be amplified further.
+
+YouTube videos with some decent contnet:
+1. https://youtu.be/5YxrpcqkTYA?si=MjpXJfiADk2nOV0v
+2. https://youtu.be/Ilv_VNvS42w?si=rzwtEUj45PeVK31_
+3. https://youtu.be/-G3z9fvQnuw?si=vS8afweoRCjJgYn8
+4. https://youtu.be/AfirWls9Sys?si=bxoBOUqJR-nA8x_0
+5. https://youtu.be/nIeipbjleuY?si=R629lEGSQSImLTJj
+6. https://youtu.be/sP_-f5nsOEo?si=MpwHychBWEMl0BsE
+7. https://youtu.be/7fuj2mdduKQ?si=k1g-MoNYCvvxFcZT
+8. https://youtu.be/sIrTu5LuSZw?si=qF9GimzcYU1RpjfZ
+
+Also useful:
+1. https://swharden.com/blog/2016-08-08-diy-ecg-with-1-op-amp/
+
