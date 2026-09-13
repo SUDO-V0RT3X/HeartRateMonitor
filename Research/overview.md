@@ -18,3 +18,7 @@ YouTube videos with some decent contnet:
 Also useful:
 1. https://swharden.com/blog/2016-08-08-diy-ecg-with-1-op-amp/
 
+
+Research paper:
+https://pmc.ncbi.nlm.nih.gov/articles/PMC9185322/
+
