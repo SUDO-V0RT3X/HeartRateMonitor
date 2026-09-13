@@ -21,4 +21,5 @@ Also useful:
 
 Research paper:
 https://pmc.ncbi.nlm.nih.gov/articles/PMC9185322/
-
+To note: various circuits exist for different types of electrodes (dry, wet, gel, etc.)
+This must be taken into account also.
