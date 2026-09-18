@@ -5,8 +5,8 @@ from collections import deque
 
 PORT = '/dev/ttyUSB0'  
 BAUD_RATE = 115200
-WINDOW_SIZE = 1000    # REDUCED: 500 points creates a readable 2-second moving window
-MAGNIFICATION = 5.0  # ADDED: Multiplier to stretch the height of the waveform
+WINDOW_SIZE = 1000    
+MAGNIFICATION = 10.0  
 
 try:
     ser = serial.Serial(PORT, BAUD_RATE, timeout=1)
@@ -15,18 +15,15 @@ except Exception as e:
     print("Make sure the Arduino Serial Plotter/Monitor is CLOSED!")
     exit()
 
-# Centered at 0 instead of 2048
-y_data = deque([0] * WINDOW_SIZE, maxlen=WINDOW_SIZE)
+# Store magnified values
+y_data = deque([2048 * MAGNIFICATION] * WINDOW_SIZE, maxlen=WINDOW_SIZE)
 
-# --- SETUP MEDICAL MONITOR STYLING ---
 plt.style.use('dark_background')
 fig, ax = plt.subplots(figsize=(10, 4))
 fig.canvas.manager.set_window_title('Heart Rate Monitor')
 
-# Draw a neon green line for the signal
 line, = ax.plot(y_data, color='#00ffcc', linewidth=2)
-
-ax.set_title("Live ECG Trace", color='#00ffcc', fontsize=16)
+ax.set_title("Heart Rate Monitor", color='#00ffcc', fontsize=16)
 ax.axis('off')  
 
 def update(frame):
@@ -39,24 +36,23 @@ def update(frame):
                 for part in parts:
                     if "Filtered:" in part:
                         raw_val = int(part.split(':')[1])
-                        
-                        # SCALING MATH: Subtract the ESP32 baseline offset and apply gain
-                        processed_val = (raw_val - 2048) * MAGNIFICATION
-                        y_data.append(processed_val)
+                        # Apply magnification directly without assuming a perfect 2048 baseline
+                        y_data.append(raw_val * MAGNIFICATION)
                         
         except (ValueError, UnicodeDecodeError, IndexError):
             pass 
             
     line.set_ydata(y_data)
     
-    # DYNAMIC SCALING: Automatically zoom the Y-axis to frame the current data points perfectly
+    # TRACKING CAMERA: Find the actual center of the current data
     if len(y_data) > 0:
-        ymin, ymax = min(y_data), max(y_data)
-        padding = max((ymax - ymin) * 0.2, 100) # Leave 20% margin above and below
-        ax.set_ylim(ymin - padding, ymax + padding)
+        current_center = sum(y_data) / len(y_data)
+        
+        # Keep a fixed "magnifying glass" window size (+/- 4000) so noise remains stable,
+        # but let the window slide up or down to follow the true baseline.
+        ax.set_ylim(current_center - 4000, current_center + 4000)
         
     return line,
 
-# Run the animation loop at ~50fps (20ms interval)
 ani = animation.FuncAnimation(fig, update, interval=20, blit=False, cache_frame_data=False)
 plt.show()
