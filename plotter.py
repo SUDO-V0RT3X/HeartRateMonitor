@@ -11,8 +11,8 @@ MAGNIFICATION = 10.0
 try:
     ser = serial.Serial(PORT, BAUD_RATE, timeout=1)
 except Exception as e:
-    print(f"Error opening serial port: {e}")
-    print("Make sure the Arduino Serial Plotter/Monitor is CLOSED!")
+    print(f"Error opening port: {e}.")
+    print("Make sure the Serial Plotter/Monitor is closed.")
     exit()
 
 # Store magnified values
@@ -44,12 +44,11 @@ def update(frame):
             
     line.set_ydata(y_data)
     
-    # TRACKING CAMERA: Find the actual center of the current data
+    # Tracking camera: Find the center of the current data
     if len(y_data) > 0:
         current_center = sum(y_data) / len(y_data)
         
-        # Keep a fixed "magnifying glass" window size (+/- 4000) so noise remains stable,
-        # but let the window slide up or down to follow the true baseline.
+        # Keep a fixed "magnifying glass" window size (+/- 4000) so noise remains stable...but let the window slide up or down to follow the true baseline.
         ax.set_ylim(current_center - 4000, current_center + 4000)
         
     return line,

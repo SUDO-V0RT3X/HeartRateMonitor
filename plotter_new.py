@@ -6,13 +6,12 @@ import time
 import csv
 from datetime import datetime
 
-# --- CONFIGURATION ---
-PORT = '/dev/ttyUSB0'  # Update to match your ESP32 port (e.g. /dev/ttyACM0)
+# Config
+PORT = '/dev/ttyUSB0'
 BAUD_RATE = 115200
-WINDOW_SIZE = 500      # Number of live data points stored in the display buffer
-MAGNIFICATION = 3.5    # Gain multiplier to amplify peak heights
+WINDOW_SIZE = 500      # Number of live data points displayed at once
+MAGNIFICATION = 3.5    # Gain multiplier to amplify peak height
 
-# --- 1. HARDWARE CONNECTION CHECK ---
 try:
     ser = serial.Serial(PORT, BAUD_RATE, timeout=1)
     print(f"[SUCCESS] Connected to hardware on {PORT}")
@@ -20,23 +19,20 @@ except Exception as e:
     print("\n" + "="*60)
     print(f"[ERROR] Could not connect to hardware on port '{PORT}'.")
     print(f"Details: {e}")
-    print("Please connect your ESP32 board and verify the port name.")
+    print("Please connect your ESP32 board and verify the port.")
     print("="*60 + "\n")
     exit()
 
-# --- 2. AUTOMATIC CSV LOGGING SETUP ---
 filename = datetime.now().strftime("%Y%m%d%H%M%S") + "_heart_rate_reading.csv"
 with open(filename, 'w', newline='') as f:
     writer = csv.writer(f)
     writer.writerow(["Time_s", "Filtered_Amplitude"])
 
-# --- DATA BUFFERS ---
 y_data = deque([0.0] * WINDOW_SIZE, maxlen=WINDOW_SIZE)
 x_data = deque([0.0] * WINDOW_SIZE, maxlen=WINDOW_SIZE)
 peak_times = []
 start_time = time.time()
 
-# --- DISPLAY & MONITOR STYLING ---
 plt.style.use('dark_background')
 fig, ax = plt.subplots(figsize=(10, 5))
 fig.canvas.manager.set_window_title('ESP32 Live Heart Rate Monitor')
@@ -49,11 +45,10 @@ ax.grid(True, color='#222222', linestyle='--', linewidth=0.5)
 bpm_text = ax.text(0.5, 0.93, 'BPM: --', transform=ax.transAxes,
                    color='red', fontsize=26, ha='center', va='top', weight='bold')
 
-# --- ANIMATION LOOP ---
+# animation loop
 def update(frame):
     current_time = time.time() - start_time
     
-    # Read all available bytes directly from the hardware serial buffer
     while ser.in_waiting > 0:
         try:
             line_str = ser.readline().decode('utf-8', errors='ignore').strip()
@@ -69,11 +64,11 @@ def update(frame):
                         x_data.append(current_time)
                         y_data.append(processed_val)
                         
-                        # Log hardware measurements directly to file
+                        # Log measurements directly to file
                         with open(filename, 'a', newline='') as f:
                             csv.writer(f).writerow([current_time, processed_val])
                         
-                        # R-peak detection for live heart rate calculation
+                        # Peak detection: LOOK MORE INTO
                         if processed_val > 250:  # Threshold spike
                             if not peak_times or (current_time - peak_times[-1] > 0.4): # Debounce limit (~150 BPM)
                                 peak_times.append(current_time)
